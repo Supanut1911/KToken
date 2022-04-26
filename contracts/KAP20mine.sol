@@ -6,7 +6,7 @@ import "./time/TimeCounter.sol";
 
 contract KAP20mine is KAP20Token{
   uint public faucetRate;
-  uint public maxLap;
+  uint public maxELap;
 
   TimeCounter public counter;
 
@@ -23,10 +23,10 @@ contract KAP20mine is KAP20Token{
     address counter_
   ) KAP20Token(name_, symbol_, _decimals, committee_, adminRouter_, kyc_, acceptedKycLevel_) {
     require(faucetRate > 0, "amount faucet need more than 0");
-    require(maxLap > 0, "maxLap need more than 0");
+    require(maxELap > 0, "maxLap need more than 0");
 
     faucetRate = faucetRate_;
-    maxLap = maxELap_;
+    maxELap = maxELap_;
     counter = TimeCounter(counter_);
   }
 
@@ -35,21 +35,21 @@ contract KAP20mine is KAP20Token{
     return miningRewardInternal(msg.sender);
   }
 
-  function getMiningRewardInternal(address user) internal view returns (uint256) {
+  function miningRewardInternal(address user) internal view returns (uint256) {
       uint256 actualElap = counter.getElapsedTimeOf(user);
-      uint256 elap = actualElapsed > maxELap_
-          ? maxELap_
+      uint256 elap = actualElap > maxELap
+          ? maxELap
           : actualElap;
-      return (faucetRate * elap) / maxELap_;
+      return (faucetRate * elap) / maxELap;
   }
 
   function mine() public {
-      _mint(msg.sender, getMiningReward());
+      _mint(msg.sender, miningReward());
       counter.stampLastAction(msg.sender);
   }
 
   function mineBKNext(address bkNextAddr) public onlySuperAdmin {
-      _mint(bkNextAddr, getMiningRewardInternal(bkNextAddr));
+      _mint(bkNextAddr, miningRewardInternal(bkNextAddr));
       counter.stampLastAction(bkNextAddr);
   }
 }
